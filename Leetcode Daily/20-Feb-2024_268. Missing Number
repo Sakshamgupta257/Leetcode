@@ -1,0 +1,10 @@
+# Python Solution
+
+class Solution(object):
+    def missingNumber(self, nums):
+        n = len(nums)
+        total_sum = n * (n + 1) // 2
+        actual_sum = sum(nums)
+        return total_sum - actual_sum
+
+# This code uses the Gauss’ Formula to find the missing number. This solution has a time complexity of O(n) and a space complexity of O(1).
