@@ -1,0 +1,40 @@
+from typing import List
+
+class Solution:
+    def calculate_operations(self, grid: List[List[int]], y_value: int, non_y_value: int) -> int:
+        grid_size = len(grid)
+        operations_count = 0
+        column_index = 0
+        y_cells = {}
+        for row_index in range(grid_size//2):
+            if grid[row_index][column_index] != y_value:
+                operations_count += 1
+            y_cells[(row_index, column_index)] = 1
+            column_index += 1
+        column_index += 1
+        for row_index in range(grid_size//2 - 1, -1, -1):
+            if grid[row_index][column_index] != y_value:
+                operations_count += 1
+            y_cells[(row_index, column_index)] = 1
+            column_index += 1
+        column_index = grid_size//2
+        for row_index in range(grid_size//2, grid_size):
+            if grid[row_index][column_index] != y_value:
+                operations_count += 1
+            y_cells[(row_index, column_index)] = 1
+        for row_index in range(grid_size):
+            for column_index in range(grid_size):
+                if (row_index, column_index) not in y_cells:
+                    if grid[row_index][column_index] != non_y_value:
+                        operations_count += 1
+        return operations_count
+
+    def minimumOperationsToWriteY(self, grid: List[List[int]]) -> int:
+        min_operations = 1e5
+        for y_value in range(3):
+            for non_y_value in range(3):
+                if y_value == non_y_value:
+                    continue
+                operations_needed = self.calculate_operations(grid, y_value, non_y_value)
+                min_operations = min(min_operations, operations_needed)
+        return min_operations
