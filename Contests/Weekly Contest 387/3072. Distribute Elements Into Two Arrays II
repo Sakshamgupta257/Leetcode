@@ -1,0 +1,98 @@
+class RangeQueryTree {
+private:
+    vector<int> segmentTree;
+    
+public:
+    RangeQueryTree(int size) {
+        segmentTree.resize(4*size);
+    }
+    
+    void updateNode(int treeNode, int rangeStart, int rangeEnd, int targetIndex) {
+        if (targetIndex < rangeStart or targetIndex > rangeEnd) {
+            return;
+        }
+        if (rangeStart == rangeEnd) {
+            segmentTree[treeNode]++;
+            return;
+        }
+        int midPoint = (rangeStart + rangeEnd) / 2;
+        updateNode(treeNode*2, rangeStart, midPoint, targetIndex);
+        updateNode(treeNode*2 + 1, midPoint + 1, rangeEnd, targetIndex);
+        segmentTree[treeNode] = segmentTree[treeNode*2] + segmentTree[treeNode*2 + 1];
+    }
+    
+    int query(int treeNode, int rangeStart, int rangeEnd, int queryStart, int queryEnd) {
+        if (queryStart > rangeEnd or queryEnd < rangeStart) {
+            return 0;
+        }
+        if (queryStart <= rangeStart and rangeEnd <= queryEnd) {
+            return segmentTree[treeNode];
+        }
+        int midPoint = (rangeStart + rangeEnd) / 2;
+        int leftQuery = query(treeNode*2, rangeStart, midPoint, queryStart, queryEnd);
+        int rightQuery = query(treeNode*2 + 1, midPoint + 1, rangeEnd, queryStart, queryEnd);
+        return leftQuery + rightQuery;
+    }
+};
+
+class Solution {
+public:    
+    vector<int> resultArray(vector<int>& inputArray) {
+        const int arraySize = inputArray.size();
+        vector<int> firstArray, secondArray;
+        firstArray.push_back(inputArray[0]);
+        secondArray.push_back(inputArray[1]);
+        
+        map<int, int> valueCompression;
+        
+        for (int i = 0; i < arraySize; ++i) {
+            valueCompression[inputArray[i]] = 0;
+        }
+        
+        int counter = 0;
+        
+        for (auto &[value, compressedValue] : valueCompression) {
+            compressedValue = counter++;
+        }
+        
+        vector<int> result;
+        const int MAXN = 1e5 + 10;
+        RangeQueryTree firstTree(MAXN);
+        firstTree.updateNode(1, 0, MAXN, valueCompression[inputArray[0]]);
+        RangeQueryTree secondTree(MAXN);
+        secondTree.updateNode(1, 0, MAXN, valueCompression[inputArray[1]]);
+        
+        for (int i = 2; i < arraySize; ++i) {
+            int firstCount = firstTree.query(1, 0, MAXN, valueCompression[inputArray[i]] + 1, MAXN);
+            int secondCount = secondTree.query(1, 0, MAXN, valueCompression[inputArray[i]] + 1, MAXN);
+            if (firstCount > secondCount) {
+                firstArray.push_back(inputArray[i]);
+                firstTree.updateNode(1, 0, MAXN, valueCompression[inputArray[i]]);
+            }
+            else if (firstCount < secondCount) {
+                secondArray.push_back(inputArray[i]);
+                secondTree.updateNode(1, 0, MAXN, valueCompression[inputArray[i]]);
+            }
+            else {
+                if (firstArray.size() <= secondArray.size()) {
+                    firstArray.push_back(inputArray[i]);
+                    firstTree.updateNode(1, 0, MAXN, valueCompression[inputArray[i]]);
+                }
+                else {
+                    secondArray.push_back(inputArray[i]);
+                    secondTree.updateNode(1, 0, MAXN, valueCompression[inputArray[i]]);
+                }
+            }
+        }
+        
+        for (int number : firstArray) {
+            result.push_back(number);
+        }
+        
+        for (int number : secondArray) {
+            result.push_back(number);
+        }
+        
+        return result;
+    }
+};
