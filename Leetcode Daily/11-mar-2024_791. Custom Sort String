@@ -1,0 +1,26 @@
+class Solution {
+public:
+    string customSortString(string order, string s) {
+        map<char, int> mat;
+        for(auto it:s) mat[it]++;
+
+        string res = "";
+       
+        // Traverse order and pick the corresponding element from map
+        for(auto it:order){
+            if(mat.count(it)){
+                for(int i = 0; i < mat[it]; i++){
+                    res += it;
+                }
+                mat.erase(it);
+            }
+        }
+
+        //Get the remaining elements in any order
+        for(auto it:mat) {
+            for(int i = 0; i < it.second; i++) res += it.first;
+        }
+
+        return res;
+    }
+};
